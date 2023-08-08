@@ -1,6 +1,8 @@
 from django.shortcuts import render
 
 from .models import Category, Product
+
+
 def index(request):
     content = {
         'title': 'ThreadFlix',
