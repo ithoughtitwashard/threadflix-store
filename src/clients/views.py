@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from clients.account_services import user_authentication_authorization
-from clients.forms import UserLoginForm, UserRegisterForm
+from clients.forms import UserLoginForm, UserRegisterForm, UserProfileForm
 
 
 def login(request):
@@ -13,8 +13,9 @@ def login(request):
             return user_authentication_authorization(request)
     else:
         form = UserLoginForm()
-    context = {'form': form}
-    return render(request, 'clients/login.html', context)
+    content = {'title': 'Sign in to ThreadFlix',
+               'form': form}
+    return render(request, 'clients/login.html', content)
 
 
 def registration(request):
@@ -25,5 +26,20 @@ def registration(request):
             return HttpResponseRedirect(reverse('clients:login'))
     else:
         form = UserRegisterForm()
-    context = {'form': form}
-    return render(request, 'clients/registration.html', context)
+    content = {'title': 'Sign up with ThreadFlix',
+               'form': form}
+    return render(request, 'clients/registration.html', content)
+
+
+def profile_page(request):
+    if request.method == 'POST':
+        form = UserProfileForm(instance=request.user, data=request.POST, files=request.FILES)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('clients:profile'))
+    else:
+        form = UserProfileForm(instance=request.user)
+    content = {'title': 'My profile',
+               'form': form
+               }
+    return render(request, 'clients/profile.html', content)

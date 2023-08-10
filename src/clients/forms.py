@@ -1,18 +1,12 @@
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from django import forms
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UserChangeForm
+from django.forms import ImageField, FileInput
 
+from clients.account_services import register_form_fields, login_form_fields, profile_form_fields_without_image
 from clients.models import User
 
 
 class UserLoginForm(AuthenticationForm):
-    username = forms.CharField(widget=forms.TextInput(attrs={
-        'class': 'form-control py-4',
-        'placeholder': 'example09'
-    }))
-    password = forms.CharField(widget=forms.PasswordInput(attrs={
-        'class': 'form-control py-4',
-        'placeholder': ''
-    }))
+    username, password = login_form_fields()
 
     class Meta:
         model = User
@@ -20,31 +14,17 @@ class UserLoginForm(AuthenticationForm):
 
 
 class UserRegisterForm(UserCreationForm):
-    first_name = forms.CharField(widget=forms.TextInput(attrs={
-        'class': 'form-control py-4',
-        'placeholder': 'Thread'
-    }))
-    last_name = forms.CharField(widget=forms.TextInput(attrs={
-        'class': 'form-control py-4',
-        'placeholder': 'Flix'
-    }))
-    email = forms.CharField(widget=forms.EmailInput(attrs={
-        'class': 'form-control py-4',
-        'placeholder': 'example@mail.com'
-    }))
-    username = forms.CharField(widget=forms.TextInput(attrs={
-        'class': 'form-control py-4',
-        'placeholder': 'example09'
-    }))
-    password1 = forms.CharField(widget=forms.PasswordInput(attrs={
-        'class': 'form-control py-4',
-        'placeholder': ''
-    }))
-    password2 = forms.CharField(widget=forms.PasswordInput(attrs={
-        'class': 'form-control py-4',
-        'placeholder': ''
-    }))
+    first_name, last_name, username, email, password1, password2 = register_form_fields()
 
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'username', 'email', 'password1', 'password2')
+
+
+class UserProfileForm(UserChangeForm):
+    first_name, last_name, username, email = profile_form_fields_without_image()
+    image = ImageField(widget=FileInput(attrs={'class': 'custom-file-input'}), required=False)
+
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'image', 'username', 'email')
