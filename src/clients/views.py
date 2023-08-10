@@ -1,11 +1,14 @@
 from django.contrib import messages
 from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count, F, Sum
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
 from clients.account_services import user_authentication_authorization
 from clients.forms import UserLoginForm, UserRegisterForm, UserProfileForm
+from products.models import Cart
 
 
 def login(request):
@@ -33,7 +36,7 @@ def registration(request):
                'form': form}
     return render(request, 'clients/registration.html', content)
 
-
+@login_required
 def profile_page(request):
     if request.method == 'POST':
         form = UserProfileForm(instance=request.user, data=request.POST, files=request.FILES)
@@ -42,9 +45,18 @@ def profile_page(request):
             return HttpResponseRedirect(reverse('clients:profile'))
     else:
         form = UserProfileForm(instance=request.user)
-    content = {'title': 'My profile',
-               'form': form
-               }
+    queryset = Cart.objects.filter(user=request.user).select_related('product').only('product__name',
+                                                                                     'product__description',
+                                                                                     'product__price', 'id',
+                                                                                     'quantity').annotate(
+        total=F('quantity') * F('product__price'))
+    total = queryset.aggregate(check_sum=Sum('total'))['check_sum']
+    content = {
+        'title': 'My profile',
+        'form': form,
+        'carts': queryset,
+        'total': total
+    }
     return render(request, 'clients/profile.html', content)
 
 
