@@ -7,3 +7,4 @@
 out
 gen
 /src/db.sqlite3
+!/src/media/users_images/

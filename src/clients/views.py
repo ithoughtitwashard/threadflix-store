@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth import logout
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -45,3 +46,8 @@ def profile_page(request):
                'form': form
                }
     return render(request, 'clients/profile.html', content)
+
+
+def log_out(request):
+    logout(request)
+    return HttpResponseRedirect(reverse('index'))
