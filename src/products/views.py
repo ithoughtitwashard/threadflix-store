@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
@@ -12,15 +13,19 @@ def index(request):
     return render(request, 'products/index.html', content)
 
 
-def products(request):
-    products_queryset = Product.objects.all()
+def products(request, category_id=None, page_num=1):
     categories_queryset = Category.objects.all().order_by('id')
+    products_queryset = Product.objects.filter(category=category_id) if category_id else Product.objects.all()
+    paginator = Paginator(products_queryset, per_page=3)
+    products_paginator = paginator.page(page_num)
+
     content = {
         'title': 'ThreadFlix catalogue',
-        'products': products_queryset,
-        'categories': categories_queryset
+        'categories': categories_queryset,
+        'products': products_paginator
     }
     return render(request, 'products/products.html', content)
+
 
 @login_required
 def add_to_cart(request, product_id):
