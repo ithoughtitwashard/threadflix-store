@@ -1,53 +1,46 @@
-from django.contrib import messages
-from django.contrib.auth import logout
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
-from django.urls import reverse
-
-from clients.account_services import user_authentication_authorization
+from django.contrib.auth.views import LoginView
+from django.contrib.messages.views import SuccessMessageMixin
+from django.db.models import F, Sum
+from django.urls import reverse, reverse_lazy
+from django.views.generic import CreateView, UpdateView
 from clients.forms import UserLoginForm, UserRegisterForm, UserProfileForm
+from clients.models import User
+from default.views import CustomMixin
+from products.models import Cart
 
 
-def login(request):
-    if request.method == 'POST':
-        form = UserLoginForm(data=request.POST)
-        if form.is_valid():
-            return user_authentication_authorization(request)
-    else:
-        form = UserLoginForm()
-    content = {'title': 'Sign in to ThreadFlix',
-               'form': form}
-    return render(request, 'clients/login.html', content)
+class UserLoginView(LoginView):
+    template_name = 'clients/login.html'
+    form_class = UserLoginForm
 
 
-def registration(request):
-    if request.method == 'POST':
-        form = UserRegisterForm(data=request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Successful registration!')
-            return HttpResponseRedirect(reverse('clients:login'))
-    else:
-        form = UserRegisterForm()
-    content = {'title': 'Sign up with ThreadFlix',
-               'form': form}
-    return render(request, 'clients/registration.html', content)
+class UserRegisterView(SuccessMessageMixin, CustomMixin, CreateView):
+    title = 'Sign up with ThreadFlix'
+    model = User
+    form_class = UserRegisterForm
+    template_name = 'clients/registration.html'
+    success_url = reverse_lazy('clients:login')
+    success_message = 'Successful registration!'
 
 
-def profile_page(request):
-    if request.method == 'POST':
-        form = UserProfileForm(instance=request.user, data=request.POST, files=request.FILES)
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(reverse('clients:profile'))
-    else:
-        form = UserProfileForm(instance=request.user)
-    content = {'title': 'My profile',
-               'form': form
-               }
-    return render(request, 'clients/profile.html', content)
+class UserProfileView(CustomMixin, UpdateView):
+    title = 'My profile'
+    model = User
+    form_class = UserProfileForm
+    template_name = 'clients/profile.html'
 
+    def get_success_url(self):
+        return reverse('clients:profile', args=(self.object.id,))
 
-def log_out(request):
-    logout(request)
-    return HttpResponseRedirect(reverse('index'))
+    def get_context_data(self, **kwargs):
+        context = super(UserProfileView, self).get_context_data()
+        carts_queryset = Cart.objects.filter(user=self.object).select_related('product').only('product__name',
+                                                                                              'product__description',
+                                                                                              'product__price',
+                                                                                              'id',
+                                                                                              'quantity').annotate(
+            total=F('quantity') * F('product__price'))
+        total = carts_queryset.aggregate(check_sum=Sum('total'))['check_sum']
+        context['carts'] = carts_queryset
+        context['total'] = total
+        return context
