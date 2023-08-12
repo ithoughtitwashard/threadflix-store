@@ -2,19 +2,17 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView, ListView
 
+from default.views import CustomMixin
 from .models import Category, Product, Cart
 
 
-class IndexView(TemplateView):
+class IndexView(CustomMixin, TemplateView):
+    title = 'ThreadFlix'
     template_name = 'products/index.html'
 
-    def get_context_data(self, **kwargs):
-        context = super(IndexView, self).get_context_data()
-        context['title'] = 'ThreadFlix'
-        return context
 
-
-class ProductsListView(ListView):
+class ProductsListView(CustomMixin, ListView):
+    title = 'ThreadFlix catalogue'
     model = Product
     template_name = 'products/products.html'
     paginate_by = 3
@@ -28,7 +26,6 @@ class ProductsListView(ListView):
     def get_context_data(self, **kwargs):
         context = super(ProductsListView, self).get_context_data()
         categories_queryset = Category.objects.all().order_by('id')
-        context['title'] = 'ThreadFlix catalogue'
         context['categories'] = categories_queryset
         return context
 
