@@ -2,29 +2,37 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.views.generic import TemplateView, ListView
 
 from .models import Category, Product, Cart
 
 
-def index(request):
-    content = {
-        'title': 'ThreadFlix',
-    }
-    return render(request, 'products/index.html', content)
+class IndexView(TemplateView):
+    template_name = 'products/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data()
+        context['title'] = 'ThreadFlix'
+        return context
 
 
-def products(request, category_id=None, page_num=1):
-    categories_queryset = Category.objects.all().order_by('id')
-    products_queryset = Product.objects.filter(category=category_id) if category_id else Product.objects.all()
-    paginator = Paginator(products_queryset, per_page=3)
-    products_paginator = paginator.page(page_num)
+class ProductsListView(ListView):
+    model = Product
+    template_name = 'products/products.html'
+    paginate_by = 3
 
-    content = {
-        'title': 'ThreadFlix catalogue',
-        'categories': categories_queryset,
-        'products': products_paginator
-    }
-    return render(request, 'products/products.html', content)
+    def get_queryset(self):
+        queryset = super(ProductsListView, self).get_queryset()
+        category_id = self.kwargs.get('category_id')
+        queryset = queryset.filter(category_id=category_id) if category_id else queryset
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super(ProductsListView, self).get_context_data()
+        categories_queryset = Category.objects.all().order_by('id')
+        context['title'] = 'ThreadFlix catalogue'
+        context['categories'] = categories_queryset
+        return context
 
 
 @login_required
