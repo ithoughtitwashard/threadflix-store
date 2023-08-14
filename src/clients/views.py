@@ -5,7 +5,7 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, UpdateView
 from clients.forms import UserLoginForm, UserRegisterForm, UserProfileForm
 from clients.models import User
-from default.views import CustomMixin
+from default.views import TitleMixin
 from products.models import Cart
 
 
@@ -14,7 +14,7 @@ class UserLoginView(LoginView):
     form_class = UserLoginForm
 
 
-class UserRegisterView(SuccessMessageMixin, CustomMixin, CreateView):
+class UserRegisterView(SuccessMessageMixin, TitleMixin, CreateView):
     title = 'Sign up with ThreadFlix'
     model = User
     form_class = UserRegisterForm
@@ -23,7 +23,7 @@ class UserRegisterView(SuccessMessageMixin, CustomMixin, CreateView):
     success_message = 'Successful registration!'
 
 
-class UserProfileView(CustomMixin, UpdateView):
+class UserProfileView(TitleMixin, UpdateView):
     title = 'My profile'
     model = User
     form_class = UserProfileForm

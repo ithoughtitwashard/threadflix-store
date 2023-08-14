@@ -2,16 +2,16 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView, ListView
 
-from default.views import CustomMixin
+from default.views import TitleMixin
 from .models import Category, Product, Cart
 
 
-class IndexView(CustomMixin, TemplateView):
+class IndexView(TitleMixin, TemplateView):
     title = 'ThreadFlix'
     template_name = 'products/index.html'
 
 
-class ProductsListView(CustomMixin, ListView):
+class ProductsListView(TitleMixin, ListView):
     title = 'ThreadFlix catalogue'
     model = Product
     template_name = 'products/products.html'
