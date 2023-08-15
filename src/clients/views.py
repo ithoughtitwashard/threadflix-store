@@ -2,9 +2,11 @@ from django.contrib.auth.views import LoginView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import F, Sum
 from django.urls import reverse, reverse_lazy
-from django.views.generic import CreateView, UpdateView
+from django.views.generic import CreateView, UpdateView, TemplateView
+
+from clients.account_services import email_verify
 from clients.forms import UserLoginForm, UserRegisterForm, UserProfileForm
-from clients.models import User
+from clients.models import User, EmailVerification
 from default.views import TitleMixin
 from products.models import Cart
 
@@ -44,3 +46,12 @@ class UserProfileView(TitleMixin, UpdateView):
         context['carts'] = carts_queryset
         context['total'] = total
         return context
+
+
+class EmailVerificationView(TitleMixin, TemplateView):
+    title = 'Email verification'
+    template_name = 'clients/email_verification.html'
+
+    def get(self, request, *args, **kwargs):
+        get = super(EmailVerificationView, self).get(request, *args, **kwargs)
+        return email_verify(kwargs=kwargs, if_true=get)

@@ -1,4 +1,12 @@
+from uuid import uuid4
+from datetime import timedelta
+
 from django import forms
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from django.utils.timezone import now
+
+from clients.models import User, EmailVerification
 
 
 def login_form_fields():
@@ -23,6 +31,25 @@ def profile_form_fields_without_image():
     username = _create_input('', 'TextInput', readonly=True)
     email = _create_input('', 'EmailInput', readonly=True)
     return first_name, last_name, username, email
+
+
+def code_and_expiration_for_email_verification():
+    expiration = now() + timedelta(hours=12)
+    code = uuid4()
+    return code, expiration
+
+
+def email_verify(kwargs, if_true):
+    code = kwargs['code']
+    email = kwargs['email']
+    user = User.objects.get(email=email)
+    verifications = EmailVerification.objects.filter(user=user, code=code)
+    if verifications.exists() and not verifications.first().is_expired():
+        user.is_verified = True
+        user.save()
+        return if_true
+    else:
+        return HttpResponseRedirect(reverse('index'))
 
 
 def _create_input(placeholder: str, input_type: str, readonly: bool = False):

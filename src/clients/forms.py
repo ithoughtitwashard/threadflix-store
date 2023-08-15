@@ -1,8 +1,9 @@
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UserChangeForm
 from django.forms import ImageField, FileInput
 
-from clients.account_services import register_form_fields, login_form_fields, profile_form_fields_without_image
-from clients.models import User
+from clients.account_services import register_form_fields, login_form_fields, profile_form_fields_without_image, \
+    code_and_expiration_for_email_verification
+from clients.models import User, EmailVerification
 
 
 class UserLoginForm(AuthenticationForm):
@@ -19,6 +20,13 @@ class UserRegisterForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'username', 'email', 'password1', 'password2')
+
+    def save(self, commit=True):
+        user = super(UserRegisterForm, self).save(commit=True)
+        code, expiration = code_and_expiration_for_email_verification()
+        record = EmailVerification.objects.create(code=code, user=user, expiration=expiration)
+        record.send_verification_email()
+        return user
 
 
 class UserProfileForm(UserChangeForm):
