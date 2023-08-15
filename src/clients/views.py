@@ -43,7 +43,6 @@ class UserProfileView(TitleMixin, UpdateView):
                                                                                               'quantity').annotate(
             total=F('quantity') * F('product__price'))
         total = carts_queryset.aggregate(check_sum=Sum('total'))['check_sum']
-        context['carts'] = carts_queryset
         context['total'] = total
         return context
 
