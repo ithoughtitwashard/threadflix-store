@@ -17,7 +17,7 @@ class IndexViewTestCase(TestCase):
 class ProductsListViewTestCase(TestCase):
     fixtures = ['categories.json', 'productsdump.json']
 
-    def test_page_products_list(self):
+    def test_products_list(self):
         url = reverse('products:index')
         response = self.client.get(url)
 
