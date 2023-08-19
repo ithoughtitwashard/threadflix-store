@@ -1,0 +1,75 @@
+{% extends 'products/base.html' %}
+{% load static %}
+
+{% block css %}
+    <link href="{% static 'vendor/css/orders.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+	<section>
+    <div class="alert alert-warning text-center" role="alert">
+        Error message
+    </div>
+    <div class="container">
+        <div class="py-5 text-center">
+            <h1>Make an order</h1>
+        </div>
+        <div class="row g-5">
+            <div class="col-md-5 col-lg-4 order-md-last">
+                <h4 class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-primary">Cart</span>
+                    <span class="badge badge-primary badge-pill text-white">{{carts.count}}</span>
+                </h4>
+                <ul class="list-group mb-3">
+                    {% for cart in carts %}
+                    <li class="list-group-item d-flex justify-content-between lh-sm">
+                        <div>
+                            <h6 class="my-0">{{ cart.product.name }}</h6>
+                            <small class="text-muted">{{cart.quantity}}</small>
+                        </div>
+                        <span class="text-muted">{{cart.total}}₴</span>
+                    </li>
+                    {% endfor %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Total price</span>
+                        <strong>{{total}}₴</strong>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-7 col-lg-8">
+                <h4 class="mb-3">Delivery address</h4>
+                <form>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label for="firstName" class="form-label">First name</label>
+                            <input type="text" class="form-control" id="firstName" placeholder="Thread" value="" required>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <label for="lastName" class="form-label">Last name</label>
+                            <input type="text" class="form-control" id="lastName" placeholder="Flix" value=""
+                                   required>
+                        </div>
+
+                        <div class="col-12 mt-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" placeholder="you@example.com">
+                        </div>
+
+                        <div class="col-12 mt-3">
+                            <label for="address" class="form-label">Address</label>
+                            <input type="text" class="form-control" id="address"
+                                   placeholder="Ukraine, Kyiv, Kovalsky provulok 5" required>
+                        </div>
+
+                    </div>
+
+                    <hr class="my-4">
+
+                    <button class="w-100 btn btn-primary btn-lg" type="submit">Continue</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
