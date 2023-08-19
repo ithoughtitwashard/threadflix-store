@@ -1,13 +1,17 @@
-from django.db.models import F
+from django.db.models import F, Sum
 
 from products.models import Cart
 
 
 def carts(request):
     user = request.user
-    return {'carts': Cart.objects.filter(user=user).select_related('product').only('product__name',
+    carts_queryset = Cart.objects.filter(user=user).select_related('product').only('product__name',
                                                                                    'product__description',
                                                                                    'product__price',
                                                                                    'id',
                                                                                    'quantity').annotate(
-        total=F('quantity') * F('product__price')) if user.is_authenticated else []}
+        total=F('quantity') * F('product__price'))
+
+    return {'carts': carts_queryset if user.is_authenticated else [],
+            'total': carts_queryset.aggregate(check_sum=Sum('total'))['check_sum']
+            }

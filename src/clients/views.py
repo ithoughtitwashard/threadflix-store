@@ -1,14 +1,12 @@
 from django.contrib.auth.views import LoginView
 from django.contrib.messages.views import SuccessMessageMixin
-from django.db.models import F, Sum
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, UpdateView, TemplateView
 
 from clients.account_services import email_verify
 from clients.forms import UserLoginForm, UserRegisterForm, UserProfileForm
-from clients.models import User, EmailVerification
+from clients.models import User
 from default.views import TitleMixin
-from products.models import Cart
 
 
 class UserLoginView(LoginView):
@@ -33,18 +31,6 @@ class UserProfileView(TitleMixin, UpdateView):
 
     def get_success_url(self):
         return reverse('clients:profile', args=(self.object.id,))
-
-    def get_context_data(self, **kwargs):
-        context = super(UserProfileView, self).get_context_data()
-        carts_queryset = Cart.objects.filter(user=self.object).select_related('product').only('product__name',
-                                                                                              'product__description',
-                                                                                              'product__price',
-                                                                                              'id',
-                                                                                              'quantity').annotate(
-            total=F('quantity') * F('product__price'))
-        total = carts_queryset.aggregate(check_sum=Sum('total'))['check_sum']
-        context['total'] = total
-        return context
 
 
 class EmailVerificationView(TitleMixin, TemplateView):
