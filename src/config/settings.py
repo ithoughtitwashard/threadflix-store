@@ -155,7 +155,6 @@ EMAIL_USE_SSL = True
 EMAIL_PORT = 465
 EMAIL_HOST_USER = os.environ.get('email_host_user')
 EMAIL_HOST_PASSWORD = os.environ.get('email_host_password')
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -171,6 +170,9 @@ SOCIALACCOUNT_PROVIDERS = {
         ],
     }
 }
+
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379'
 
 # LOGGING = {
 #     'version': 1,
