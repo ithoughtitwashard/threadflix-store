@@ -12,6 +12,11 @@ def carts(request):
                                                                                       'quantity').annotate(
         total=F('quantity') * F('product__price'))
 
+    if not carts_queryset:
+        total = 0
+    else:
+        total = carts_queryset.aggregate(check_sum=Sum('total'))['check_sum']
+
     return {'carts': carts_queryset if user.is_authenticated else [],
-            'total': carts_queryset.aggregate(check_sum=Sum('total'))['check_sum'] if user.is_authenticated else 0
+            'total': total if user.is_authenticated else 0
             }
