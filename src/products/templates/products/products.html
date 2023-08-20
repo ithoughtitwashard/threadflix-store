@@ -1,5 +1,5 @@
 {% extends 'products/base.html' %}
-{% load static %}
+{% load static cache humanize %}
 
 {% block css %}
     <link href="{% static 'vendor/css/products.css' %}" rel="stylesheet">
@@ -51,6 +51,7 @@
             </div>
 
             <div class="row">
+            {% cache 60 object_list %}
             {% for product in object_list %}
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="card h-100">
@@ -63,7 +64,7 @@
                             <h4 class="card-title">
                                 <a href="#">{{ product.name }}</a>
                             </h4>
-                            <h5>{{ product.price }}₴</h5>
+                            <h5>{{ product.price|intcomma}}₴</h5>
                             <p class="card-text">{{ product.description }}</p>
                         </div>
                         <div class="card-footer text-center">
@@ -73,6 +74,7 @@
                     </div>
                 </div>
             {% endfor %}
+            {% endcache %}
 
             </div>
 

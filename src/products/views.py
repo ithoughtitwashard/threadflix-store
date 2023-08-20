@@ -1,17 +1,18 @@
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView, ListView
 
-from default.views import CustomMixin
+from default.views import TitleMixin
 from .models import Category, Product, Cart
 
 
-class IndexView(CustomMixin, TemplateView):
+class IndexView(TitleMixin, TemplateView):
     title = 'ThreadFlix'
     template_name = 'products/index.html'
 
 
-class ProductsListView(CustomMixin, ListView):
+class ProductsListView(TitleMixin, ListView):
     title = 'ThreadFlix catalogue'
     model = Product
     template_name = 'products/products.html'
@@ -25,8 +26,15 @@ class ProductsListView(CustomMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(ProductsListView, self).get_context_data()
-        categories_queryset = Category.objects.all().order_by('id')
-        context['categories'] = categories_queryset
+
+        categories = cache.get('categories')
+        if not categories:
+            cache_time = 60  # seconds
+            categories_queryset = Category.objects.all().order_by('id')
+            context['categories'] = categories_queryset
+            cache.set('categories', context['categories'], cache_time)
+        else:
+            context['categories'] = categories
         return context
 
 

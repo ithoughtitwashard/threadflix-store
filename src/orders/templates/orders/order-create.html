@@ -1,0 +1,74 @@
+{% extends 'products/base.html' %}
+{% load static humanize %}
+
+{% block css %}
+    <link href="{% static 'vendor/css/orders.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+	<section>
+    <div class="alert alert-warning text-center" role="alert">
+        Error message
+    </div>
+    <div class="container">
+        <div class="py-5 text-center">
+            <h1>Make an order</h1>
+        </div>
+        <div class="row g-5">
+            <div class="col-md-5 col-lg-4 order-md-last">
+                <h4 class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-primary">Cart</span>
+                    <span class="badge badge-primary badge-pill text-white">{{carts.count}}</span>
+                </h4>
+                <ul class="list-group mb-3">
+                    {% for cart in carts %}
+                    <li class="list-group-item d-flex justify-content-between lh-sm">
+                        <div>
+                            <h6 class="my-0">{{ cart.product.name }}</h6>
+                            <small class="text-muted">{{cart.quantity}}</small>
+                        </div>
+                        <span class="text-muted">{{cart.total|intcomma}}₴</span>
+                    </li>
+                    {% endfor %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Total price</span>
+                        <strong>{{total|intcomma}}₴</strong>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-7 col-lg-8">
+                <h4 class="mb-3">Delivery address</h4>
+                <form action="{% url 'orders:create' %}" method="post">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label for="{{ form.delivery_first_name.id_for_label }}" class="form-label">First name</label>
+                            {{ form.delivery_first_name }}
+                        </div>
+
+                        <div class="col-sm-6">
+                            <label for="{{ form.delivery_last_name.id_for_label }}" class="form-label">Last name</label>
+                            {{ form.delivery_last_name }}
+                        </div>
+
+                        <div class="col-12 mt-3">
+                            <label for="{{ form.delivery_email.id_for_label }}" class="form-label">Email</label>
+                            {{ form.delivery_email }}
+                        </div>
+
+                        <div class="col-12 mt-3">
+                            <label for="{{ form.delivery_address.id_for_label }}" class="form-label">Address</label>
+                            {{ form.delivery_address }}
+                        </div>
+
+                    </div>
+
+                    <hr class="my-4">
+
+                    <button class="w-100 btn btn-primary btn-lg" type="submit">Continue</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

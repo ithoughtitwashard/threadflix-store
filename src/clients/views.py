@@ -1,12 +1,12 @@
 from django.contrib.auth.views import LoginView
 from django.contrib.messages.views import SuccessMessageMixin
-from django.db.models import F, Sum
 from django.urls import reverse, reverse_lazy
-from django.views.generic import CreateView, UpdateView
+from django.views.generic import CreateView, UpdateView, TemplateView
+
+from clients.account_services import email_verify
 from clients.forms import UserLoginForm, UserRegisterForm, UserProfileForm
 from clients.models import User
-from default.views import CustomMixin
-from products.models import Cart
+from default.views import TitleMixin
 
 
 class UserLoginView(LoginView):
@@ -14,7 +14,7 @@ class UserLoginView(LoginView):
     form_class = UserLoginForm
 
 
-class UserRegisterView(SuccessMessageMixin, CustomMixin, CreateView):
+class UserRegisterView(SuccessMessageMixin, TitleMixin, CreateView):
     title = 'Sign up with ThreadFlix'
     model = User
     form_class = UserRegisterForm
@@ -23,7 +23,7 @@ class UserRegisterView(SuccessMessageMixin, CustomMixin, CreateView):
     success_message = 'Successful registration!'
 
 
-class UserProfileView(CustomMixin, UpdateView):
+class UserProfileView(TitleMixin, UpdateView):
     title = 'My profile'
     model = User
     form_class = UserProfileForm
@@ -32,15 +32,11 @@ class UserProfileView(CustomMixin, UpdateView):
     def get_success_url(self):
         return reverse('clients:profile', args=(self.object.id,))
 
-    def get_context_data(self, **kwargs):
-        context = super(UserProfileView, self).get_context_data()
-        carts_queryset = Cart.objects.filter(user=self.object).select_related('product').only('product__name',
-                                                                                              'product__description',
-                                                                                              'product__price',
-                                                                                              'id',
-                                                                                              'quantity').annotate(
-            total=F('quantity') * F('product__price'))
-        total = carts_queryset.aggregate(check_sum=Sum('total'))['check_sum']
-        context['carts'] = carts_queryset
-        context['total'] = total
-        return context
+
+class EmailVerificationView(TitleMixin, TemplateView):
+    title = 'Email verification'
+    template_name = 'clients/email_verification.html'
+
+    def get(self, request, *args, **kwargs):
+        get = super(EmailVerificationView, self).get(request, *args, **kwargs)
+        return email_verify(kwargs=kwargs, if_true=get)

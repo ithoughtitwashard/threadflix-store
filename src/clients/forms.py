@@ -3,6 +3,7 @@ from django.forms import ImageField, FileInput
 
 from clients.account_services import register_form_fields, login_form_fields, profile_form_fields_without_image
 from clients.models import User
+from clients.tasks import send_email
 
 
 class UserLoginForm(AuthenticationForm):
@@ -19,6 +20,11 @@ class UserRegisterForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'username', 'email', 'password1', 'password2')
+
+    def save(self, commit=True):
+        user = super(UserRegisterForm, self).save(commit=True)
+        send_email.delay(user.id)
+        return user
 
 
 class UserProfileForm(UserChangeForm):
