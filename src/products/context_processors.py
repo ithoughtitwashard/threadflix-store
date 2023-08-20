@@ -13,5 +13,5 @@ def carts(request):
         total=F('quantity') * F('product__price'))
 
     return {'carts': carts_queryset if user.is_authenticated else [],
-            'total': carts_queryset.aggregate(check_sum=Sum('total'))['check_sum']
+            'total': carts_queryset.aggregate(check_sum=Sum('total'))['check_sum'] if user.is_authenticated else 0
             }
